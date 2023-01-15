@@ -6,33 +6,25 @@ use Weebel\Contracts\Configuration as ConfigurationInterface;
 
 class Configuration implements ConfigurationInterface
 {
-    protected string $env = "dev";
-    protected bool $debug = true;
-    protected string $basePath = __DIR__;
-    protected string $configPath = __DIR__ . "/config";
+    protected string $basePath;
+    protected string $configPath;
 
     protected array $config = [];
 
     public function __construct(array $config)
     {
+        $this->config = $config;
+
         $this->basePath = $config['basePath'] ?? pathinfo($_SERVER["SCRIPT_FILENAME"], PATHINFO_DIRNAME);
         $this->configPath = removeDuplicateSlashes($config['configPath'] ?? $this->basePath . '/config');
-        isset($config['env']) && $this->env = $config['env'];
-        isset($config['debug']) && $this->debug = $config['debug'];
+        isset($config['env']) && $this->config['app']['env'] = $config['env'];
+        isset($config['debug']) && $this->config['app']['debug'] = $config['debug'];
 
-        $this->config = $config;
-        $this->config['app']['basePath'] = $this->basePath;
-        $this->config['app']['configPath'] = $this->configPath;
-        $this->config['app']['env'] = $this->env;
-        $this->config['app']['debug'] = $this->debug;
     }
 
-    /**
-     * @return string
-     */
     public function getEnv(): string
     {
-        return $this->env;
+        return $this->get('app.env');
     }
 
     public function get(string $string, mixed $default = null): mixed
@@ -44,7 +36,7 @@ class Configuration implements ConfigurationInterface
 
     public function isDebug(): bool
     {
-        return $this->debug;
+        return $this->get('app.debug');
     }
 
     /**
